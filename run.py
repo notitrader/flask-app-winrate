@@ -1,119 +1,80 @@
-from flask import Flask, render_template, request, send_file
-import numpy as np
+from flask import Flask, render_template, request
 import pandas as pd
-import io
+import matplotlib
+matplotlib.use('Agg')  # Usa un backend che non richiede una GUI
 import matplotlib.pyplot as plt
 import base64
+from io import BytesIO
+import numpy as np
 
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    avg_profit = 0
+    max_drawdown = 0
+    sharpe_ratio = 0
     df_combined_html = None
-    avg_profit = None
-    max_drawdown = None
-    sharpe_ratio = None
     graph_image = None
 
     if request.method == 'POST':
-        contracts = int(request.form.get("contracts", 1))
-        min_ticks_profit = int(request.form.get("min_ticks_profit", 3))
-        max_ticks_profit = int(request.form.get("max_ticks_profit", 7))
-        ticks_loss = int(request.form.get("ticks_loss", 5))
-        tick_value = float(request.form.get("tick_value", 12.5))
-        fee_per_contract = float(request.form.get("fee_per_contract", 2.5))
-        num_trades = int(request.form.get("num_trades", 200))
-        breakeven_trades = int(request.form.get("breakeven_trades", 10)) / 100
-        win_rate = int(request.form.get("win_rate", 60)) / 100
-        num_variations = int(request.form.get("num_variations", 10))
+        # Recupera i dati dal form con .get() e valori predefiniti
+        contracts = int(request.form.get('contracts', 1))
+        min_ticks_profit = int(request.form.get('min_ticks_profit', 3))
+        max_ticks_profit = int(request.form.get('max_ticks_profit', 7))
+        ticks_loss = int(request.form.get('ticks_loss', 5))
+        tick_value = float(request.form.get('tick_value', 12.5))
+        fee_per_contract = float(request.form.get('fee_per_contract', 2.5))
+        num_trades = int(request.form.get('num_trades', 200))
+        breakeven_trades = int(request.form.get('breakeven_trades', 10))
+        win_rate = int(request.form.get('win_rate', 60))
+        num_variations = int(request.form.get('num_variations', 10))
 
-        if min_ticks_profit >= max_ticks_profit:
-            return render_template('index.html', error="Minimum Profit Ticks must be less than Maximum Profit Ticks.")
-
-        adjusted_win_rate = win_rate * (1 - breakeven_trades)
-        loss_rate = 1 - adjusted_win_rate - breakeven_trades
-
-        simulation_results = {}
-        ticks_used = {}
-
-        for variation in range(1, num_variations + 1):
+        # Simulazione delle variations
+        results = []
+        for _ in range(num_variations):
             profits = []
-            ticks = []
             for _ in range(num_trades):
-                random_value = np.random.rand()
-                if random_value <= breakeven_trades:
-                    profit = -(fee_per_contract * contracts * 2)
-                    ticks.append(0)
-                elif random_value <= breakeven_trades + adjusted_win_rate:
-                    random_ticks_profit = np.random.randint(min_ticks_profit, max_ticks_profit + 1)
-                    profit = (random_ticks_profit * tick_value * contracts) - (fee_per_contract * contracts * 2)
-                    ticks.append(random_ticks_profit)
+                if np.random.rand() < win_rate / 100:
+                    profit = np.random.randint(min_ticks_profit, max_ticks_profit + 1) * tick_value
                 else:
-                    profit = -(ticks_loss * tick_value * contracts) - (fee_per_contract * contracts * 2)
-                    ticks.append(-ticks_loss)
+                    profit = -ticks_loss * tick_value
                 profits.append(profit)
             cumulative_profit = np.cumsum(profits)
-            simulation_results[f'Variation {variation}'] = cumulative_profit
-            ticks_used[f'Variation {variation}'] = ticks
+            results.append(cumulative_profit)
 
-        df_simulation = pd.DataFrame(simulation_results)
-        df_ticks = pd.DataFrame(ticks_used)
-        df_simulation.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
-        df_ticks.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
-        df_ticks = df_ticks.applymap(str)
+        # Combina i risultati in un unico DataFrame
+        df_combined = pd.DataFrame(results).T
+        df_combined.columns = [f'Variation {i+1}' for i in range(num_variations)]
 
-        combined_data = {}
-        for variation in range(1, num_variations + 1):
-            combined_data[(f'Variation {variation}', 'Profits')] = df_simulation[f'Variation {variation}'].apply(lambda x: f"${x:,.2f}")
-            combined_data[(f'Variation {variation}', 'Ticks')] = df_ticks[f'Variation {variation}']
+        # Calcolo delle metriche
+        avg_profit = df_combined.iloc[-1].mean()
+        max_drawdown = df_combined.min().min()
+        sharpe_ratio = avg_profit / df_combined.stack().std() if df_combined.stack().std() != 0 else 0
+        sharpe_ratio = round(sharpe_ratio, 2)  # Arrotonda lo Sharpe Ratio a 2 decimali
 
-        df_combined = pd.DataFrame(combined_data)
-        df_combined.columns = pd.MultiIndex.from_tuples(df_combined.columns, names=["Variation", "Trades"])
-        # Adjust DataFrame to only show the first 10 rows
-        df_combined_html = df_combined.head(10).to_html(classes='table table-striped', index=False)
-
-        selected_variation = request.form.get("selected_variation", "All Variations")
-        if selected_variation == "All Variations":
-            selected_variations = df_simulation.columns.tolist()
-            avg_profit = df_simulation[selected_variations].iloc[-1].mean()
-            drawdown = df_simulation[selected_variations].cummax() - df_simulation[selected_variations]
-            max_drawdown = drawdown.max().max()
-            sharpe_ratio = (df_simulation[selected_variations].mean().mean() / df_simulation[selected_variations].std().mean()) * np.sqrt(252)
-        else:
-            selected_variations = [selected_variation]
-            avg_profit = df_simulation[selected_variation].iloc[-1].mean()
-            drawdown = df_simulation[selected_variation].cummax() - df_simulation[selected_variation]
-            max_drawdown = drawdown.max().max()
-            sharpe_ratio = (df_simulation[selected_variation].mean() / df_simulation[selected_variation].std()) * np.sqrt(252)
-
-        df_combined_html = df_combined.to_html(classes='table table-striped', index=False)
-
-        # Genera il grafico
+        # Creazione del grafico con Matplotlib
         plt.figure(figsize=(10, 6))
-        for variation in selected_variations:
-            plt.plot(df_simulation.index, df_simulation[variation], label=variation)
-        plt.title('Cumulative Profit Over Time')
-        plt.xlabel('Trade Number')
+        for col in df_combined.columns:
+            plt.plot(df_combined.index, df_combined[col], label=col)
+        plt.title('Cumulative Profit Chart for Variations')
+        plt.xlabel('Trade')
         plt.ylabel('Cumulative Profit')
-        plt.legend()
         plt.grid(True)
+        plt.legend(loc='upper left')
 
-        # Converti il grafico in immagine
-        img = io.BytesIO()
+        # Salva il grafico in un'immagine
+        img = BytesIO()
         plt.savefig(img, format='png')
         img.seek(0)
-        graph_image = base64.b64encode(img.getvalue()).decode('utf8')
-        plt.close()
+        graph_image = base64.b64encode(img.getvalue()).decode()
 
-    return render_template('index.html', df_combined_html=df_combined_html, avg_profit=avg_profit, max_drawdown=max_drawdown, sharpe_ratio=sharpe_ratio, graph_image=graph_image)
+        # Converte il dataframe in tabella HTML
+        df_combined_html = df_combined.to_html(classes='table table-striped', index=False)
 
-@app.route('/download', methods=['POST'])
-def download():
-    csv = request.form['csv_data']
-    b = io.BytesIO()
-    b.write(csv.encode())
-    b.seek(0)
-    return send_file(b, as_attachment=True, download_name='simulation_results.csv', mimetype='text/csv')
+    return render_template('index.html', avg_profit=avg_profit, max_drawdown=max_drawdown,
+                           sharpe_ratio=sharpe_ratio, df_combined_html=df_combined_html,
+                           graph_image=graph_image)
 
 if __name__ == '__main__':
     app.run(debug=True)
