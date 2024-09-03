@@ -7,6 +7,7 @@
     <title>Contract-Based Trading Simulator</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/styles.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
@@ -34,41 +35,46 @@
                                 <option value="4">4</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label for="min_ticks_profit" class="form-label">Minimum Profit Ticks</label>
-                            <input type="number" id="min_ticks_profit" name="min_ticks_profit" class="form-control" min="1" max="300" value="3">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="min_ticks_profit" class="form-label">Minimum Profit Ticks</label>
+                                <input type="number" id="min_ticks_profit" name="min_ticks_profit" class="form-control" min="1" max="300" value="3">
+                            </div>
+                            <div class="col">
+                                <label for="max_ticks_profit" class="form-label">Maximum Profit Ticks</label>
+                                <input type="number" id="max_ticks_profit" name="max_ticks_profit" class="form-control" min="1" max="300" value="7">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="tick_value" class="form-label">Tick Value ($)</label>
+                                <input type="number" id="tick_value" name="tick_value" class="form-control" step="0.01" value="12.5">
+                            </div>
+                            <div class="col">
+                                <label for="fee_per_contract" class="form-label">Fee per Contract ($)</label>
+                                <input type="number" id="fee_per_contract" name="fee_per_contract" class="form-control" step="0.01" value="2.5">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="num_trades" class="form-label">Number of Trades</label>
+                                <input type="number" id="num_trades" name="num_trades" class="form-control" min="1" max="2000" value="200">
+                            </div>
+                            <div class="col">
+                                <label for="num_variations" class="form-label">Number of Variations</label>
+                                <input type="number" id="num_variations" name="num_variations" class="form-control" min="1" max="50" value="10">
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label for="max_ticks_profit" class="form-label">Maximum Profit Ticks</label>
-                            <input type="number" id="max_ticks_profit" name="max_ticks_profit" class="form-control" min="1" max="300" value="7">
+                            <label for="breakeven_trades" class="form-label">Breakeven Trades (%) <span id="breakeven_value">10%</span></label>
+<input type="range" id="breakeven_trades" name="breakeven_trades" class="form-range" min="0" max="100" value="10" oninput="updateBreakevenValue(this.value)">
+
+
                         </div>
                         <div class="mb-3">
-                            <label for="ticks_loss" class="form-label">Loss Ticks</label>
-                            <input type="number" id="ticks_loss" name="ticks_loss" class="form-control" min="1" max="200" value="5">
-                        </div>
-                        <div class="mb-3">
-                            <label for="tick_value" class="form-label">Tick Value ($)</label>
-                            <input type="number" id="tick_value" name="tick_value" class="form-control" step="0.01" value="12.5">
-                        </div>
-                        <div class="mb-3">
-                            <label for="fee_per_contract" class="form-label">Fee per Contract ($)</label>
-                            <input type="number" id="fee_per_contract" name="fee_per_contract" class="form-control" step="0.01" value="2.5">
-                        </div>
-                        <div class="mb-3">
-                            <label for="num_trades" class="form-label">Number of Trades</label>
-                            <input type="number" id="num_trades" name="num_trades" class="form-control" min="1" max="2000" value="200">
-                        </div>
-                        <div class="mb-3">
-                            <label for="breakeven_trades" class="form-label">Breakeven Trades (%)</label>
-                            <input type="range" id="breakeven_trades" name="breakeven_trades" class="form-range" min="0" max="100" value="10">
-                        </div>
-                        <div class="mb-3">
-                            <label for="win_rate" class="form-label">Win Percentage (%)</label>
-                            <input type="range" id="win_rate" name="win_rate" class="form-range" min="0" max="100" value="60">
-                        </div>
-                        <div class="mb-3">
-                            <label for="num_variations" class="form-label">Number of Variations</label>
-                            <input type="number" id="num_variations" name="num_variations" class="form-control" min="1" max="50" value="10">
+                            <label for="win_rate" class="form-label">Win Percentage (%) <span id="winrate_value">60%</span></label>
+<input type="range" id="win_rate" name="win_rate" class="form-range" min="0" max="100" value="60" oninput="updateWinRateValue(this.value)">
+
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Run Simulation</button>
                     </form>
@@ -90,8 +96,8 @@
                                 </div>
                             </div>
                             <div class="col-4 text-end">
-                                <div class="icon icon-shape bg-gradient-primary text-white rounded-circle shadow">
-                                    <i class="ni ni-money-coins text-lg"></i>
+                                <div class="icon icon-shape bg-gradient-primary text-white shadow">
+                                    <i class="fas fa-coins text-lg"></i>
                                 </div>
                             </div>
                         </div>
@@ -107,8 +113,8 @@
                                 </div>
                             </div>
                             <div class="col-4 text-end">
-                                <div class="icon icon-shape bg-gradient-primary text-white rounded-circle shadow">
-                                    <i class="ni ni-money-coins text-lg"></i>
+                                <div class="icon icon-shape bg-gradient-primary text-white shadow">
+                                    <i class="fas fa-chart-line text-lg"></i>
                                 </div>
                             </div>
                         </div>
@@ -120,18 +126,30 @@
                             <div class="col-8">
                                 <div class="numbers">
                                     <p class="text-sm text-uppercase text-muted mb-1">Sharpe Ratio:</p>
-                                    <h5 class="font-weight-bold mb-0">${{ sharpe_ratio }} </h5>
+                                    <h5 class="font-weight-bold mb-0">{{ sharpe_ratio }} </h5>
                                 </div>
                             </div>
                             <div class="col-4 text-end">
-                                <div class="icon icon-shape bg-gradient-primary text-white rounded-circle shadow">
-                                    <i class="ni ni-money-coins text-lg"></i>
+                                <div class="icon icon-shape bg-gradient-primary text-white shadow">
+                                    <i class="fas fa-percentage text-lg"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Cumulative Profit Chart -->
+            {% if graph_image %}
+            <div class="card mt-4">
+                <div class="card-header pb-0">
+                    <h2 class="text-center">Cumulative Profit Chart</h2>
+                </div>
+                <div class="card-body text-center">
+                    <img src="data:image/png;base64,{{ graph_image }}" class="img-fluid" alt="Cumulative Profit Chart">
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Simulation Results -->
             {% if df_combined_html %}
@@ -146,32 +164,19 @@
                 </div>
             </div>
             {% endif %}
-
-            <!-- Cumulative Profit Chart -->
-            {% if graph_image %}
-            <div class="card mt-4">
-                <div class="card-header pb-0">
-                    <h2 class="text-center">Cumulative Profit Chart</h2>
-                </div>
-                <div class="card-body text-center">
-                    <img src="data:image/png;base64,{{ graph_image }}" class="img-fluid" alt="Cumulative Profit Chart">
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Download CSV -->
-            {% if df_combined_html %}
-            <div class="card mt-4">
-                <div class="card-body text-center">
-                    <form method="POST" action="/download">
-                        <input type="hidden" name="csv_data" value="{{ df_combined_html }}">
-                        <button type="submit" class="btn btn-secondary">Download as CSV</button>
-                    </form>
-                </div>
-            </div>
-            {% endif %}
         </div>
     </div>
+    <script>
+        function updateBreakevenValue(value) {
+            document.getElementById('breakeven_value').textContent = value + '%';
+        }
+    
+        function updateWinRateValue(value) {
+            document.getElementById('winrate_value').textContent = value + '%';
+        }
+    </script>
+    
+    
 </body>
 
 </html>
