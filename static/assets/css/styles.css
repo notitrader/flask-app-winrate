@@ -18536,12 +18536,16 @@ label,
   height: 48px;
   background-position: center;
   border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .icon-shape i {
   color: #fff;
   opacity: 0.8;
-  top: 11px;
   position: relative;
+  top: 0; /* Rimuove qualsiasi offset verticale */
 }
 .icon-shape .ni {
   top: 14px;
