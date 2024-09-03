@@ -68,7 +68,9 @@ def index():
             combined_data[(f'Variation {variation}', 'Ticks')] = df_ticks[f'Variation {variation}']
 
         df_combined = pd.DataFrame(combined_data)
-        df_combined.columns = pd.MultiIndex.from_tuples(df_combined.columns, names=["Variation", "Type"])
+        df_combined.columns = pd.MultiIndex.from_tuples(df_combined.columns, names=["Variation", "Trades"])
+        # Adjust DataFrame to only show the first 10 rows
+        df_combined_html = df_combined.head(10).to_html(classes='table table-striped', index=False)
 
         selected_variation = request.form.get("selected_variation", "All Variations")
         if selected_variation == "All Variations":
