@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract-Based Trading Simulator</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body class="g-sidenav-show bg-gray-100">
+    <div class="container-fluid py-4">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h1 class="text-center">Contract-Based Trading Simulator</h1>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contracts" class="form-label">Number of Contracts</label>
+                                <select id="contracts" name="contracts" class="form-control">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="min_ticks_profit" class="form-label">Minimum Profit Ticks</label>
+                                <input type="number" id="min_ticks_profit" name="min_ticks_profit" class="form-control" min="1" max="300" value="3">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="max_ticks_profit" class="form-label">Maximum Profit Ticks</label>
+                                <input type="number" id="max_ticks_profit" name="max_ticks_profit" class="form-control" min="1" max="300" value="7">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="ticks_loss" class="form-label">Loss Ticks</label>
+                                <input type="number" id="ticks_loss" name="ticks_loss" class="form-control" min="1" max="200" value="5">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tick_value" class="form-label">Tick Value ($)</label>
+                                <input type="number" id="tick_value" name="tick_value" class="form-control" step="0.01" value="12.5">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="fee_per_contract" class="form-label">Fee per Contract ($)</label>
+                                <input type="number" id="fee_per_contract" name="fee_per_contract" class="form-control" step="0.01" value="2.5">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="num_trades" class="form-label">Number of Trades</label>
+                                <input type="number" id="num_trades" name="num_trades" class="form-control" min="1" max="2000" value="200">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="breakeven_trades" class="form-label">Breakeven Trades (%)</label>
+                                <input type="number" id="breakeven_trades" name="breakeven_trades" class="form-control" min="0" max="100" value="10">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="win_rate" class="form-label">Win Percentage (%)</label>
+                                <input type="number" id="win_rate" name="win_rate" class="form-control" min="0" max="100" value="60">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="num_variations" class="form-label">Number of Variations</label>
+                                <input type="number" id="num_variations" name="num_variations" class="form-control" min="1" max="50" value="10">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="selected_variation" class="form-label">Select Variation to Display</label>
+                        <select id="selected_variation" name="selected_variation" class="form-control">
+                            <option value="All Variations">All Variations</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Run Simulation</button>
+                </form>
+            </div>
+        </div>
+
+        {% if df_combined_html %}
+        <div class="card mt-4">
+            <div class="card-header pb-0">
+                <h2 class="text-center">Simulation Results</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">{{ df_combined_html|safe }}</div>
+                <p class="text-muted">Average Cumulative Profits: ${{ avg_profit }}</p>
+                <p class="text-muted">Maximum Drawdown: ${{ max_drawdown }}</p>
+                <p class="text-muted">Sharpe Ratio: {{ sharpe_ratio }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if graph_image %}
+        <div class="card mt-4">
+            <div class="card-header pb-0">
+                <h2 class="text-center">Cumulative Profit Chart</h2>
+            </div>
+            <div class="card-body text-center">
+                <img src="data:image/png;base64,{{ graph_image }}" class="img-fluid" alt="Cumulative Profit Chart">
+            </div>
+        </div>
+        {% endif %}
+
+        {% if df_combined_html %}
+        <div class="card mt-4">
+            <div class="card-body text-center">
+                <form method="POST" action="/download">
+                    <input type="hidden" name="csv_data" value="{{ df_combined_html }}">
+                    <button type="submit" class="btn btn-secondary">Download as CSV</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>
