@@ -16,105 +16,108 @@
     </div>
 
     <div class="container-fluid py-4 d-flex">
-        <!-- Sidenav -->
-        <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 ps">
-            <div class="sidenav-header">
-                <h3 class="text-center">Fields</h3>
-            </div>
-            <div class="sidenav-body">
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="contracts" class="form-label">Number of Contracts</label>
-                        <select id="contracts" name="contracts" class="form-control">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="min_ticks_profit" class="form-label">Minimum Profit Ticks</label>
-                        <input type="number" id="min_ticks_profit" name="min_ticks_profit" class="form-control" min="1" max="300" value="3">
-                    </div>
-                    <div class="mb-3">
-                        <label for="max_ticks_profit" class="form-label">Maximum Profit Ticks</label>
-                        <input type="number" id="max_ticks_profit" name="max_ticks_profit" class="form-control" min="1" max="300" value="7">
-                    </div>
-                    <div class="mb-3">
-                        <label for="ticks_loss" class="form-label">Loss Ticks</label>
-                        <input type="number" id="ticks_loss" name="ticks_loss" class="form-control" min="1" max="200" value="5">
-                    </div>
-                    <div class="mb-3">
-                        <label for="tick_value" class="form-label">Tick Value ($)</label>
-                        <input type="number" id="tick_value" name="tick_value" class="form-control" step="0.01" value="12.5">
-                    </div>
-                    <div class="mb-3">
-                        <label for="fee_per_contract" class="form-label">Fee per Contract ($)</label>
-                        <input type="number" id="fee_per_contract" name="fee_per_contract" class="form-control" step="0.01" value="2.5">
-                    </div>
-                    <div class="mb-3">
-                        <label for="num_trades" class="form-label">Number of Trades</label>
-                        <input type="number" id="num_trades" name="num_trades" class="form-control" min="1" max="2000" value="200">
-                    </div>
-                    <div class="mb-3">
-                        <label for="breakeven_trades" class="form-label">Breakeven Trades (%)</label>
-                        <input type="range" id="breakeven_trades" name="breakeven_trades" class="form-range" min="0" max="100" value="10">
-                    </div>
-                    <div class="mb-3">
-                        <label for="win_rate" class="form-label">Win Percentage (%)</label>
-                        <input type="range" id="win_rate" name="win_rate" class="form-range" min="0" max="100" value="60">
-                    </div>
-                    <div class="mb-3">
-                        <label for="num_variations" class="form-label">Number of Variations</label>
-                        <input type="number" id="num_variations" name="num_variations" class="form-control" min="1" max="50" value="10">
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Run Simulation</button>
-                </form>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-            <div class="container-fluid py-4">
-                {% if df_combined_html %}
-                <div class="card mt-4">
-                    <div class="card-header pb-0">
-                        <h2 class="text-center">Simulation Results</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                            {{ df_combined_html|safe }}
+        <!-- Left Container for Form -->
+        <div class="left-container" style="flex: 1 1 30%; max-width: 30%; padding-right: 20px;">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h3 class="text-center">Fields</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="contracts" class="form-label">Number of Contracts</label>
+                            <select id="contracts" name="contracts" class="form-control">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
                         </div>
-                        <p class="text-muted">Average Cumulative Profits: ${{ avg_profit }}</p>
-                        <p class="text-muted">Maximum Drawdown: ${{ max_drawdown }}</p>
-                        <p class="text-muted">Sharpe Ratio: {{ sharpe_ratio }}</p>
-                    </div>
+                        <div class="mb-3">
+                            <label for="min_ticks_profit" class="form-label">Minimum Profit Ticks</label>
+                            <input type="number" id="min_ticks_profit" name="min_ticks_profit" class="form-control" min="1" max="300" value="3">
+                        </div>
+                        <div class="mb-3">
+                            <label for="max_ticks_profit" class="form-label">Maximum Profit Ticks</label>
+                            <input type="number" id="max_ticks_profit" name="max_ticks_profit" class="form-control" min="1" max="300" value="7">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ticks_loss" class="form-label">Loss Ticks</label>
+                            <input type="number" id="ticks_loss" name="ticks_loss" class="form-control" min="1" max="200" value="5">
+                        </div>
+                        <div class="mb-3">
+                            <label for="tick_value" class="form-label">Tick Value ($)</label>
+                            <input type="number" id="tick_value" name="tick_value" class="form-control" step="0.01" value="12.5">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fee_per_contract" class="form-label">Fee per Contract ($)</label>
+                            <input type="number" id="fee_per_contract" name="fee_per_contract" class="form-control" step="0.01" value="2.5">
+                        </div>
+                        <div class="mb-3">
+                            <label for="num_trades" class="form-label">Number of Trades</label>
+                            <input type="number" id="num_trades" name="num_trades" class="form-control" min="1" max="2000" value="200">
+                        </div>
+                        <div class="mb-3">
+                            <label for="breakeven_trades" class="form-label">Breakeven Trades (%)</label>
+                            <input type="range" id="breakeven_trades" name="breakeven_trades" class="form-range" min="0" max="100" value="10">
+                        </div>
+                        <div class="mb-3">
+                            <label for="win_rate" class="form-label">Win Percentage (%)</label>
+                            <input type="range" id="win_rate" name="win_rate" class="form-range" min="0" max="100" value="60">
+                        </div>
+                        <div class="mb-3">
+                            <label for="num_variations" class="form-label">Number of Variations</label>
+                            <input type="number" id="num_variations" name="num_variations" class="form-control" min="1" max="50" value="10">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Run Simulation</button>
+                    </form>
                 </div>
-                {% endif %}
-
-                {% if graph_image %}
-                <div class="card mt-4">
-                    <div class="card-header pb-0">
-                        <h2 class="text-center">Cumulative Profit Chart</h2>
-                    </div>
-                    <div class="card-body text-center">
-                        <img src="data:image/png;base64,{{ graph_image }}" class="img-fluid" alt="Cumulative Profit Chart">
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if df_combined_html %}
-                <div class="card mt-4">
-                    <div class="card-body text-center">
-                        <form method="POST" action="/download">
-                            <input type="hidden" name="csv_data" value="{{ df_combined_html }}">
-                            <button type="submit" class="btn btn-secondary">Download as CSV</button>
-                        </form>
-                    </div>
-                </div>
-                {% endif %}
             </div>
-        </main>
+        </div>
+
+        <!-- Right Container for Results -->
+        <div class="right-container" style="flex: 1 1 70%; max-width: 70%;">
+            <!-- Simulation Results -->
+            {% if df_combined_html %}
+            <div class="card mt-4">
+                <div class="card-header pb-0">
+                    <h2 class="text-center">Simulation Results</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        {{ df_combined_html|safe }}
+                    </div>
+                    <p class="text-muted">Average Cumulative Profits: ${{ avg_profit }}</p>
+                    <p class="text-muted">Maximum Drawdown: ${{ max_drawdown }}</p>
+                    <p class="text-muted">Sharpe Ratio: {{ sharpe_ratio }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Cumulative Profit Chart -->
+            {% if graph_image %}
+            <div class="card mt-4">
+                <div class="card-header pb-0">
+                    <h2 class="text-center">Cumulative Profit Chart</h2>
+                </div>
+                <div class="card-body text-center">
+                    <img src="data:image/png;base64,{{ graph_image }}" class="img-fluid" alt="Cumulative Profit Chart">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Download CSV -->
+            {% if df_combined_html %}
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <form method="POST" action="/download">
+                        <input type="hidden" name="csv_data" value="{{ df_combined_html }}">
+                        <button type="submit" class="btn btn-secondary">Download as CSV</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </body>
 
