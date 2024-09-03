@@ -22705,3 +22705,27 @@ pre[class*=language-] {
   }
 }
 /*# sourceMappingURL=soft-ui-dashboard.css.map */
+.left-container {
+    flex: 1 1 30%;
+    max-width: 30%;
+    padding-right: 20px;
+}
+
+.right-container {
+    flex: 1 1 70%;
+    max-width: 70%;
+}
+
+.card {
+    margin-bottom: 1rem;
+}
+
+.table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+}
