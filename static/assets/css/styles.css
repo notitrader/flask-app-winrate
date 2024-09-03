@@ -22729,3 +22729,20 @@ pre[class*=language-] {
     display: block;
     width: 100%;
 }
+.table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.table {
+    font-size: 0.85rem; /* Smaller font size */
+}
+
+.card {
+    margin-bottom: 1rem;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+}
